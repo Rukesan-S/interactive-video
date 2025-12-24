@@ -2,22 +2,62 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lesson Video</title>
+<title>Lesson Video (No Forward)</title>
 <style>
 body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
-iframe { width: 800px; height: 450px; border: none; }
+#player { width: 800px; height: 450px; margin: auto; }
 </style>
 </head>
 <body>
 
-<h1>Lesson Video</h1>
+<h1>Lesson Video (Cannot Forward)</h1>
 
-<!-- Replace "u9Nj9cIyPFg" with your YouTube video ID -->
-<iframe 
-    src="https://www.youtube.com/embed/u9Nj9cIyPFg?rel=0&modestbranding=1&autoplay=0" 
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-    allowfullscreen>
-</iframe>
+<div id="player"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+let maxTime = 0; // max time the user is allowed to watch
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        height: '450',
+        width: '800',
+        videoId: 'u9Nj9cIyPFg', // your video ID
+        playerVars: {
+            'controls': 0,  // hides controls
+            'rel': 0,
+            'modestbranding': 1
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    player.playVideo();
+    setInterval(checkTime, 200);
+}
+
+function onPlayerStateChange(event) {
+    if(event.data === YT.PlayerState.PLAYING) {
+        maxTime = player.getCurrentTime();
+    }
+}
+
+// Check every 200ms if user tries to skip ahead
+function checkTime() {
+    if(!player) return;
+    const currentTime = player.getCurrentTime();
+    if(currentTime > maxTime + 0.5) { // allow small buffer
+        player.seekTo(maxTime); // go back
+    } else {
+        maxTime = currentTime; // update allowed max
+    }
+}
+</script>
 
 </body>
 </html>
