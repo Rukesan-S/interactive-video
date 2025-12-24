@@ -2,29 +2,37 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Controlled Video Player</title>
+<title>Lesson Video Controlled</title>
 <style>
 body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
 #player { width: 800px; height: 450px; margin: auto; }
-button { padding: 10px 20px; margin: 5px; }
+select { padding: 5px; margin-top: 10px; font-size: 16px; }
 </style>
 </head>
 <body>
 
 <h1>Lesson Video</h1>
+
 <div id="player"></div>
 
-<div>
-  <button onclick="playVideo()">Play</button>
-  <button onclick="pauseVideo()">Pause</button>
-  <button onclick="seekBackward()">-10s</button>
-  <button onclick="seekForward()">+10s</button>
-</div>
+<label for="speed">Playback Speed:</label>
+<select id="speed" onchange="changeSpeed()">
+  <option value="0.25">0.25x</option>
+  <option value="0.5">0.5x</option>
+  <option value="0.75">0.75x</option>
+  <option value="1" selected>1x</option>
+  <option value="1.25">1.25x</option>
+  <option value="1.5">1.5x</option>
+  <option value="1.75">1.75x</option>
+  <option value="2">2x</option>
+</select>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let player;
-let videoId = 'u9Nj9cIyPFg'; // only ID, no URL exposed
+
+// Replace with your YouTube video ID only
+const videoId = 'u9Nj9cIyPFg';
 
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
@@ -32,26 +40,30 @@ function onYouTubeIframeAPIReady() {
         width: '800',
         videoId: videoId,
         playerVars: {
-            'controls': 0, // hide default controls
-            'rel': 0,
-            'modestbranding': 1
+            'controls': 1,          // shows basic controls
+            'rel': 0,               // no related videos at end
+            'modestbranding': 1,    // remove YouTube logo
+            'fs': 0,                // disable fullscreen button
+            'disablekb': 1          // disable keyboard shortcuts
+        },
+        events: {
+            'onReady': onPlayerReady
         }
     });
 }
 
-// Custom control functions
-function playVideo() { player.playVideo(); }
-function pauseVideo() { player.pauseVideo(); }
-function seekForward() {
-    let t = player.getCurrentTime();
-    player.seekTo(t + 10, true);
-}
-function seekBackward() {
-    let t = player.getCurrentTime();
-    player.seekTo(Math.max(t - 10, 0), true);
+function onPlayerReady(event) {
+    // Set initial speed
+    player.setPlaybackRate(1);
 }
 
-// Disable right-click
+// Change playback speed from dropdown
+function changeSpeed() {
+    const speed = parseFloat(document.getElementById('speed').value);
+    player.setPlaybackRate(speed);
+}
+
+// Disable right-click to prevent "Copy video URL"
 document.addEventListener('contextmenu', event => event.preventDefault());
 </script>
 
