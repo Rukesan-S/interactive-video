@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Interactive Lesson Video</title>
+<style>
+body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+#mcq { display: none; margin-top: 20px; }
+button { padding: 10px 20px; margin-top: 10px; }
+.option { display: block; margin: 5px; }
+#result { display: none; margin-top: 20px; font-size: 20px; font-weight: bold; }
+iframe { width: 720px; height: 405px; }
+</style>
+</head>
+<body>
+
+<h1>Interactive Lesson Video</h1>
+
+<div id="player"></div>
+
+<div id="mcq">
+<h2 id="questionTitle"></h2>
+<div id="options"></div>
+<button onclick="submitMCQ()">Submit Answer</button>
+</div>
+
+<div id="result"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+let mcqShown = false;
+let currentMCQ = 0;
+let answers = [];
+
+// Replace with your YouTube video ID
+const videoId = 'https://youtu.be/u9Nj9cIyPFg'; 
+
+const mcqs = [
+{time: 10, question: "Q1. What is 1 + 1 in C?", options: ["1","2","3","4"], answer: "2"},
+{time: 20, question: "Q2. Which data type stores true/false values?", options: ["int","float","bool","char"], answer: "bool"},
+{time: 30, question: "Q3. What symbol ends a C statement?", options: [";",":","!","."], answer: ";"},
+{time: 40, question: "Q4. Which loop executes at least once?", options: ["for","while","do-while","if"], answer: "do-while"}
+];
+
+// YouTube player
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        height: '405',
+        width: '720',
+        videoId: videoId,
+        events: {
+            'onReady': () => player.playVideo(),
+            'onStateChange': onPlayerStateChange
+        },
+        playerVars: { 'controls': 1, 'rel': 0, 'modestbranding': 1 }
+    });
+}
+
+let checkInterval;
+function onPlayerStateChange(event) {
+    if(event.data === YT.PlayerState.PLAYING) {
+        checkInterval = setInterval(checkTime, 500);
+    } else {
+        clearInterval(checkInterval);
+    }
+}
+
+function checkTime() {
+    if(currentMCQ < mcqs.length) {
+        const t = player.getCurrentTime();
+        if(t >= mcqs[currentMCQ].time && !mcqShown) {
+            player.pauseVideo();
+            showMCQ(currentMCQ);
+            mcqShown = true;
+        }
+    }
+}
+
+const mcqDiv = document.getElementById('mcq');
+const questionTitle = document.getElementById('questionTitle');
+const optionsDiv = document.getElementById('options');
+const resultDiv = document.getElementById('result');
+
+function showMCQ(index) {
+    mcqDiv.style.display = 'block';
+    questionTitle.textContent = mcqs[index].question;
+    optionsDiv.innerHTML = '';
+    mcqs[index].options.forEach(opt => {
+        const label = document.createElement('label');
+        label.className = 'option';
+        label.innerHTML = `<input type="radio" name="q${index}" value="${opt}"> ${opt}`;
+        optionsDiv.appendChild(label);
+    });
+}
+
+// Replace with your Apps Script Web App URL
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzsF3TYk2ZoWe2-zUiDrhoqnx9bhKdBc5NtWRuS7m9ocizwyZiZ6wxVbocS2dXU9PGVJQ/exec";
+
+async function submitMCQ() {
+    const options = document.getElementsByName('q' + currentMCQ);
+    let selected = null;
+    for(const opt of options) { if(opt.checked) selected = opt.value; }
+    if(!selected) { alert('Please select an answer!'); return; }
+
+    answers[currentMCQ] = selected;
+    mcqDiv.style.display = 'none';
+    currentMCQ++;
+    mcqShown = false;
+
+    if(currentMCQ >= mcqs.length) {
+        player.getIframe().style.display = 'none';
+        try {
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({answers: answers}),
+                headers: {'Content-Type':'application/json'}
+            });
+            const score = await response.text();
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = `Your answers have been submitted. You scored ${score} out of ${mcqs.length}!`;
+        } catch(err) {
+            alert("Error submitting answers: " + err);
+        }
+    } else {
+        player.playVideo();
+    }
+}
+</script>
+
+</body>
+</html>
