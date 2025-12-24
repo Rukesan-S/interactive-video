@@ -33,17 +33,18 @@ let mcqShown = false;
 let currentMCQ = 0;
 let answers = [];
 
-// Replace with your YouTube video ID
-const videoId = 'u9Nj9cIyPFg'; 
+// ✅ Use only the video ID, NOT full URL
+const videoId = 'u9Nj9cIyPFg'; // replace with your YouTube video ID
 
+// MCQs and checkpoints (in seconds)
 const mcqs = [
-{time: 10, question: "Q1. What is 1 + 1 in C?", options: ["1","2","3","4"], answer: "2"},
-{time: 20, question: "Q2. Which data type stores true/false values?", options: ["int","float","bool","char"], answer: "bool"},
-{time: 30, question: "Q3. What symbol ends a C statement?", options: [";",":","!","."], answer: ";"},
-{time: 40, question: "Q4. Which loop executes at least once?", options: ["for","while","do-while","if"], answer: "do-while"}
+  {time: 10, question: "Q1. What is 1 + 1 in C?", options: ["1","2","3","4"], answer: "2"},
+  {time: 20, question: "Q2. Which data type stores true/false values?", options: ["int","float","bool","char"], answer: "bool"},
+  {time: 30, question: "Q3. What symbol ends a C statement?", options: [";",":","!","."], answer: ";"},
+  {time: 40, question: "Q4. Which loop executes at least once?", options: ["for","while","do-while","if"], answer: "do-while"}
 ];
 
-// YouTube player
+// YouTube Player API
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
         height: '405',
@@ -77,6 +78,7 @@ function checkTime() {
     }
 }
 
+// MCQ DOM elements
 const mcqDiv = document.getElementById('mcq');
 const questionTitle = document.getElementById('questionTitle');
 const optionsDiv = document.getElementById('options');
@@ -94,7 +96,7 @@ function showMCQ(index) {
     });
 }
 
-// Replace with your Apps Script Web App URL
+// ✅ Replace with your Apps Script Web App URL
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzsF3TYk2ZoWe2-zUiDrhoqnx9bhKdBc5NtWRuS7m9ocizwyZiZ6wxVbocS2dXU9PGVJQ/exec";
 
 async function submitMCQ() {
